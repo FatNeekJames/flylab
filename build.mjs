@@ -1,7 +1,8 @@
-import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
-const files=['app.js','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css'];
+import { mkdir, copyFile, readFile, writeFile, cp } from 'node:fs/promises';
+const files=['app.js','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css','core.mjs','adaptation.mjs','life-ui.js','activity-view.js'];
 await mkdir('dist/vendor/three',{recursive:true});
 for(const file of files)await copyFile(file,`dist/${file}`);
+await cp('skills','dist/skills',{recursive:true});
 const html=(await readFile('index.html','utf8')).replace('./node_modules/three/build/three.module.js','./vendor/three/three.module.js');
 await writeFile('dist/index.html',html);
 for(const name of ['three.module.js','three.core.js'])await copyFile(`node_modules/three/build/${name}`,`dist/vendor/three/${name}`);

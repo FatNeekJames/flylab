@@ -1,12 +1,13 @@
 // A small, seeded leaky integrate-and-fire illustration. No FlyWire edges or recordings.
 export const REGIONS=[
- {id:'optic',name:'Optic lobes',short:'OL',count:112,color:'#459bdd',description:'Paired visual neuropils: lamina, medulla, lobula and lobula plate. These process visual information; they are not the eyes themselves.'},
+ {id:'optic',name:'Optic lobes',short:'OL',count:88,color:'#459bdd',description:'Paired visual neuropils: lamina, medulla, lobula and lobula plate. These process visual information; they are not the eyes themselves.'},
  {id:'central',name:'Central complex',short:'CX',count:56,color:'#b89cf5',description:'Midline structures including the fan-shaped body, ellipsoid body and protocerebral bridge. Involved in orientation, navigation and action selection.'},
  {id:'mushroom',name:'Mushroom bodies',short:'MB',count:48,color:'#e1b473',description:'Paired calyces, peduncles and lobes support associative learning and memory. Their role is broader than a direct muscle command.'},
  {id:'antennal',name:'Antennal lobes',short:'AL',count:40,color:'#e183b0',description:'Paired glomerular structures processing olfactory input. This scene supplies no odor stimulus, so they retain background model activity.'},
  {id:'sez',name:'Subesophageal zone',short:'SEZ',count:48,color:'#6bddc1',description:'Ventral brain region associated with taste, mechanosensation and motor pathways. Schematic activity here is driven by game effort, not measured fly data.'},
  {id:'descending',name:'Descending pathways',short:'DN',count:32,color:'#e5e995',description:'Axons convey signals through the neck from brain regions to the ventral nerve cord. Drawn as a pathway, not a separate anatomical brain lobe.'},
- {id:'vnc',name:'Ventral nerve cord',short:'VNC',count:48,color:'#92dbae',description:'Outside the brain, in the body. Thoracic motor and premotor circuits coordinate leg movements and integrate proprioceptive feedback. The inset shows the three thoracic leg regions schematically.'}
+ {id:'vnc',name:'Ventral nerve cord',short:'VNC',count:48,color:'#92dbae',description:'Outside the brain, in the body. Thoracic motor and premotor circuits coordinate leg movements and integrate proprioceptive feedback. The inset shows the three thoracic leg regions schematically.'},
+ {id:'lateral',name:'Lateral horn',short:'LH',count:24,color:'#eca980',description:'A higher-order olfactory region. Linking it to poker or blackjack decisions is a stylized game analogy, not evidence of a card-playing circuit.'}
 ];
 export const MODEL_COUNT=REGIONS.reduce((n,r)=>n+r.count,0),BIN=.015,WINDOW=3,COLUMNS=200;
 export class NeuralModel {
@@ -15,7 +16,8 @@ export class NeuralModel {
  reset(){this.seed=731;this.time=0;this.accumulator=0;this.cursor=0;this.filled=0;this.recent=[];this.spikes=0;this.active=0;this.neurons=[];this.population=new Float32Array(REGIONS.length);this.readout={press:0,lower:0,hold:0};this.raster=Array.from({length:COLUMNS},()=>new Uint8Array(MODEL_COUNT));REGIONS.forEach((r,g)=>{for(let i=0;i<r.count;i++)this.neurons.push({group:g,v:this.random()*.85,refractory:0,glow:0,gain:.75+this.random()*.5})})}
  step(dt,state){this.accumulator+=Math.min(.1,dt);while(this.accumulator>=BIN){this.accumulator-=BIN;this.tick(state)}}
  tick(s){this.time+=BIN;const effort=s.running?s.effort/100:0,press=s.running&&s.phase>=.5,lower=s.running&&s.phase<.5,hold=s.running&&s.stall>0;
-  const old=this.population,drive=[.14+.10*effort,.13+.26*effort,.10,.10,.16+.48*effort,.09+.64*effort,.12+.8*effort];
+  const a=s.activitySignal,motor=a?.motor??effort,learning=a?.learning??(s.running?.12:0),decision=a?.decision??0;
+  const old=this.population,drive=[.14+.10*motor,.13+.26*motor,.10+.55*learning,.10,.16+.48*motor,.09+.64*motor,.12+.8*motor,.1+.65*decision];
   // Coarse directional coupling, chosen for this illustration, not anatomical synapse weights.
   drive[1]+=old[0]*.2;drive[4]+=old[6]*.12;drive[5]+=old[1]*.25+old[4]*.3;drive[6]+=old[5]*.4;
   const col=this.raster[this.cursor];col.fill(0);const pop=new Float32Array(REGIONS.length);let count=0;

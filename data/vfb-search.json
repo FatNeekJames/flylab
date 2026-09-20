@@ -1,0 +1,86 @@
+{
+  "adult central complex": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult central complex\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 3,\n  \"distinct_terms\": 3,\n  \"solr_matches\": 3,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult central complex\\\" is an exact label match, so only that term is shown out of 3. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00003632\",\n      \"label\": \"adult central complex (FBbt_00003632)\",\n      \"original_label\": \"adult central complex\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "adult mushroom body": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult mushroom body\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 56,\n  \"distinct_terms\": 56,\n  \"solr_matches\": 56,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult mushroom body\\\" is an exact label match, so only that term is shown out of 56. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00003684\",\n      \"label\": \"adult mushroom body (FBbt_00003684)\",\n      \"original_label\": \"adult mushroom body\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "adult lateral horn": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult lateral horn\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 500,\n  \"distinct_terms\": 500,\n  \"solr_matches\": 584,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult lateral horn\\\" is an exact label match, so only that term is shown out of 500. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs. Solr matched 584 terms but only the top 500 were ranked, so this is not an exhaustive list. Narrow the query or add filter_types rather than paging past 500.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00007053\",\n      \"label\": \"adult lateral horn (FBbt_00007053)\",\n      \"original_label\": \"adult lateral horn\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "adult optic lobe": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult optic lobe\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 26,\n  \"distinct_terms\": 26,\n  \"solr_matches\": 26,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult optic lobe\\\" is an exact label match, so only that term is shown out of 26. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00003701\",\n      \"label\": \"adult optic lobe (FBbt_00003701)\",\n      \"original_label\": \"adult optic lobe\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "adult antennal lobe": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult antennal lobe\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 389,\n  \"distinct_terms\": 389,\n  \"solr_matches\": 389,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult antennal lobe\\\" is an exact label match, so only that term is shown out of 389. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00007401\",\n      \"label\": \"adult antennal lobe (FBbt_00007401)\",\n      \"original_label\": \"adult antennal lobe\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "adult subesophageal zone": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult subesophageal zone\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 14,\n  \"distinct_terms\": 14,\n  \"solr_matches\": 14,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult subesophageal zone\\\" is an exact label match, so only that term is shown out of 14. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00110639\",\n      \"label\": \"adult subesophageal zone (FBbt_00110639)\",\n      \"original_label\": \"adult subesophageal zone\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  },
+  "adult ventral nerve cord": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"query\": \"adult ventral nerve cord\",\n  \"unique\": true,\n  \"start\": 0,\n  \"returned\": 1,\n  \"total\": 202,\n  \"distinct_terms\": 202,\n  \"solr_matches\": 202,\n  \"candidate_pool\": 500,\n  \"_note\": \"\\\"adult ventral nerve cord\\\" is an exact label match, so only that term is shown out of 202. Re-run with minimize_results=false and auto_fetch_term_info=false to see the rest. Only short_form, label and original_label are shown; re-run with minimize_results=false for facets and IDs.\",\n  \"results\": [\n    {\n      \"short_form\": \"FBbt_00004052\",\n      \"label\": \"adult ventral nerve cord (FBbt_00004052)\",\n      \"original_label\": \"adult ventral nerve cord\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 1
+  }
+}

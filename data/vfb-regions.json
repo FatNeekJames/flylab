@@ -1,0 +1,35 @@
+{
+  "retrieved": "2026-09-20",
+  "source": "https://vfb3-mcp.virtualflybrain.org",
+  "method": "MCP search_terms exact label + get_term_info",
+  "terms": [
+    {
+      "label": "adult central complex",
+      "id": "FBbt_00003632"
+    },
+    {
+      "label": "adult mushroom body",
+      "id": "FBbt_00003684"
+    },
+    {
+      "label": "adult lateral horn",
+      "id": "FBbt_00007053"
+    },
+    {
+      "label": "adult optic lobe",
+      "id": "FBbt_00003701"
+    },
+    {
+      "label": "adult antennal lobe",
+      "id": "FBbt_00007401"
+    },
+    {
+      "label": "adult subesophageal zone",
+      "id": "FBbt_00110639"
+    },
+    {
+      "label": "adult ventral nerve cord",
+      "id": "FBbt_00004052"
+    }
+  ]
+}

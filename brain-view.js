@@ -1,5 +1,36 @@
 import * as THREE from 'three';
 import {NeuralModel,REGIONS,MODEL_COUNT,COLUMNS,BIN} from './neural.mjs';
+// Static exact-label VFB MCP results; source snapshot: data/vfb-regions.json.
+export const VFB_REGIONS={
+  "central": {
+    "name": "adult central complex",
+    "id": "FBbt_00003632"
+  },
+  "mushroom": {
+    "name": "adult mushroom body",
+    "id": "FBbt_00003684"
+  },
+  "lateral": {
+    "name": "adult lateral horn",
+    "id": "FBbt_00007053"
+  },
+  "optic": {
+    "name": "adult optic lobe",
+    "id": "FBbt_00003701"
+  },
+  "antennal": {
+    "name": "adult antennal lobe",
+    "id": "FBbt_00007401"
+  },
+  "sez": {
+    "name": "adult subesophageal zone",
+    "id": "FBbt_00110639"
+  },
+  "vnc": {
+    "name": "adult ventral nerve cord",
+    "id": "FBbt_00004052"
+  }
+};
 const $=id=>document.getElementById(id);
 export class BrainPanel {
  constructor(engine){
@@ -27,7 +58,7 @@ export class BrainPanel {
   new IntersectionObserver(entries=>{this.visible=entries[0].isIntersecting},{rootMargin:'100px'}).observe(this.host);
   let drag=null;this.host.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];this.host.setPointerCapture(e.pointerId)});this.host.addEventListener('pointermove',e=>{if(!drag)return;this.root.rotation.y+=(e.clientX-drag[0])*.007;this.root.rotation.x=Math.max(-.7,Math.min(.7,this.root.rotation.x+(e.clientY-drag[1])*.005));drag=[e.clientX,e.clientY]});for(const event of ['pointerup','pointercancel'])this.host.addEventListener(event,()=>drag=null);
   $('brainFront').onclick=()=>this.root.rotation.set(0,0,0);$('liveSpikes').onclick=()=>this.setMode('spikes');$('cellColors').onclick=()=>this.setMode('cells');
-  document.querySelectorAll('[data-region]').forEach(b=>b.onclick=()=>{this.selected=b.dataset.region;document.querySelectorAll('[data-region]').forEach(other=>{const active=other===b;other.classList.toggle('selected',active);other.setAttribute('aria-pressed',active)});$('regionDescription').textContent=this.selected==='all'?'Explore the paired visual regions, central brain and descending pathways. The ventral nerve cord sits in the body, shown here as a separate inset.':REGIONS.find(r=>r.id===this.selected).description});
+  document.querySelectorAll('[data-region]').forEach(b=>b.onclick=()=>{this.selected=b.dataset.region;document.querySelectorAll('[data-region]').forEach(other=>{const active=other===b;other.classList.toggle('selected',active);other.setAttribute('aria-pressed',active)});$('regionDescription').textContent=this.selected==='all'?'Explore the paired visual regions, central brain and descending pathways. The ventral nerve cord sits in the body, shown here as a separate inset.':REGIONS.find(r=>r.id===this.selected).description + (VFB_REGIONS[this.selected] ? ' VFB: '+VFB_REGIONS[this.selected].name+' · '+VFB_REGIONS[this.selected].id : ' Pathway illustration; not a separate brain region.')});
   this.ctx=$('spikeRaster').getContext('2d');this.raster=document.createElement('canvas');this.raster.width=COLUMNS;this.raster.height=MODEL_COUNT;this.rctx=this.raster.getContext('2d');this.pixels=this.rctx.createImageData(COLUMNS,MODEL_COUNT);this.drawRaster();
  }
  random(){this.seed=(1664525*this.seed+1013904223)>>>0;return this.seed/4294967296}
@@ -39,6 +70,7 @@ export class BrainPanel {
   if(g===3)return this.ellipsoid(s*.45,-.39,.28,.26,.23,.22);
   if(g===4)return this.ellipsoid(0,-.65,-.03,.43,.30,.29);
   if(g===5)return this.ellipsoid(s*.075,-1,.02,.035,.27,.055);
+  if(g===7)return this.ellipsoid(s*.88,.51,.06,.24,.23,.2);
   const segment=i%3;return this.ellipsoid(1.58+s*.095,-1.22-segment*.23,0,.10,.10,.10);
  }
  shell(position,scale,color,opacity){const m=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false}));m.position.set(...position);m.scale.set(...scale);this.root.add(m);this.surfaces.push(m)}
@@ -47,5 +79,5 @@ export class BrainPanel {
  reset(){this.model.reset();this.drawRaster()}
  drawRaster(){const image=this.pixels,data=image.data,model=this.model;let n=0;REGIONS.forEach((region,g)=>{const color=new THREE.Color(region.color);const rgb=[Math.round(color.r*255),Math.round(color.g*255),Math.round(color.b*255)];for(let j=0;j<region.count;j++,n++)for(let x=0;x<COLUMNS;x++){const src=(model.cursor+x)%COLUMNS,on=model.raster[src][n],k=(n*COLUMNS+x)*4;data[k]=on?Math.max(90,rgb[0]):11;data[k+1]=on?Math.max(150,rgb[1]):25;data[k+2]=on?Math.max(150,rgb[2]):36;data[k+3]=255}});this.rctx.putImageData(image,0,0);const c=this.ctx,canvas=$('spikeRaster'),w=Math.max(240,canvas.clientWidth),h=canvas.clientHeight,ratio=Math.min(devicePixelRatio,2);if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio)}c.setTransform(ratio,0,0,ratio,0,0);c.clearRect(0,0,w,h);c.imageSmoothingEnabled=false;const left=33,top=8,pw=w-left-8,ph=h-29;c.drawImage(this.raster,left,top,pw,ph);let y=top;c.font='9px monospace';c.textAlign='right';REGIONS.forEach(r=>{c.fillStyle=r.color;c.fillText(r.short,left-6,y+r.count/MODEL_COUNT*ph/2+3);c.strokeStyle='#44617855';c.beginPath();c.moveTo(left,y);c.lineTo(w-8,y);c.stroke();y+=r.count/MODEL_COUNT*ph});c.fillStyle='#839cae';c.textAlign='left';c.fillText('−3 s',left,h-6);c.textAlign='center';c.fillText('−2 s',left+pw/3,h-6);c.fillText('−1 s',left+pw*2/3,h-6);c.textAlign='right';c.fillText('now',w-8,h-6)}
 
- update(dt){this.time+=dt;this.model.step(dt,this.engine);this.paint+=dt;if(this.paint<.03)return;this.paint=0;const colors=this.nodes.geometry.attributes.color;const base=new THREE.Color(),hot=new THREE.Color('#f2ffc1');this.model.neurons.forEach((n,i)=>{const region=REGIONS[n.group],selected=this.selected==='all'||this.selected===region.id;base.set(this.mode==='cells'?region.color:'#3888c2');if(this.mode==='spikes')base.lerp(hot,n.glow);base.multiplyScalar(selected?.55+n.glow*1.5:.10);colors.setXYZ(i,base.r,base.g,base.b)});colors.needsUpdate=true;this.clouds.forEach((cloud,i)=>{const selected=this.selected==='all'||this.selected===REGIONS[i].id;cloud.material.color.set(this.mode==='cells'?REGIONS[i].color:'#3999d2');cloud.material.opacity=selected?.88:.07});if(this.visible)this.renderer.render(this.scene,this.camera);this.drawRaster();$('spikeCount').textContent=this.model.spikes;$('activeCount').textContent=this.model.active;$('modelPhase').textContent=!this.engine.running?'REST':this.engine.stall?'HOLD':this.engine.phase<.5?'LOWER':'PRESS';for(const name of ['press','lower','hold']){const value=this.model.readout[name];$(name+'Drive').value=value;$(name+'Value').textContent=value.toFixed(2)}}
+ update(dt){this.time+=dt;this.model.step(dt,this.engine);this.paint+=dt;if(this.paint<.03)return;this.paint=0;const colors=this.nodes.geometry.attributes.color;const base=new THREE.Color(),hot=new THREE.Color('#f2ffc1');this.model.neurons.forEach((n,i)=>{const region=REGIONS[n.group],selected=this.selected==='all'||this.selected===region.id;base.set(this.mode==='cells'?region.color:'#3888c2');if(this.mode==='spikes')base.lerp(hot,n.glow);base.multiplyScalar(selected?.55+n.glow*1.5:.10);colors.setXYZ(i,base.r,base.g,base.b)});colors.needsUpdate=true;this.clouds.forEach((cloud,i)=>{const selected=this.selected==='all'||this.selected===REGIONS[i].id;cloud.material.color.set(this.mode==='cells'?REGIONS[i].color:'#3999d2');cloud.material.opacity=selected?.88:.07});if(this.visible)this.renderer.render(this.scene,this.camera);this.drawRaster();$('spikeCount').textContent=this.model.spikes;$('activeCount').textContent=this.model.active;$('activityBrain').textContent=this.engine.activitySignal ? this.engine.activitySignal.label+' → stylized CX / VNC movement, MB learning and LH decision signals. No biological poker or PhD circuit.' : 'Manual bench activity · anatomy-informed game signals';$('modelPhase').textContent=this.engine.activitySignal?'TRAIN':!this.engine.running?'REST':this.engine.stall?'HOLD':this.engine.phase<.5?'LOWER':'PRESS';for(const name of ['press','lower','hold']){const value=this.model.readout[name];$(name+'Drive').value=value;$(name+'Value').textContent=value.toFixed(2)}}
 }

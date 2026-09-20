@@ -6,3 +6,8 @@ reference-frames.jpg
 .env.*
 !.env.example
 *.log
+
+__pycache__/
+scripts/create-skills.py
+scripts/wire-expansion.py
+scripts/repair-encoding.py

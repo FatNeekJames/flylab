@@ -1,0 +1,13 @@
+import s0 from './bench-press.mjs';
+import s1 from './chest-flies.mjs';
+import s2 from './stairmaster.mjs';
+import s3 from './marathon.mjs';
+import s4 from './swimming.mjs';
+import s5 from './blackjack.mjs';
+import s6 from './poker.mjs';
+import s7 from './phd.mjs';
+import s8 from './yoga.mjs';
+import s9 from './chess.mjs';
+import s10 from './cooking.mjs';
+import s11 from './rest.mjs';
+export const skills = [s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11];

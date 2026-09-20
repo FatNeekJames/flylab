@@ -23,7 +23,7 @@ Research checked 20 September 2026. Scope: adult Drosophila brain organization, 
 
 ## What actually runs
 
-The panel runs a seeded, 384-unit leaky integrate-and-fire illustration in seven groups. It uses a 45 ms integration time constant, 25 ms refractory parameter and 15 ms time steps. These parameters and connection strengths are chosen for the game and are not fitted to experimental data. Group coupling loosely follows sensory-to-central-to-descending-to-VNC directionality; it is not extracted from FlyWire. Hand-built 3D point clouds are visual scaffolding, not one dot per biological neuron.
+The panel runs a seeded, 384-unit leaky integrate-and-fire illustration in eight groups. It uses a 45 ms integration time constant, 25 ms refractory parameter and 15 ms time steps. These parameters and connection strengths are chosen for the game and are not fitted to experimental data. Group coupling loosely follows sensory-to-central-to-descending-to-VNC directionality; it is not extracted from FlyWire. Hand-built 3D point clouds are visual scaffolding, not one dot per biological neuron.
 
 Each raster row represents one model unit. There are 200 chronological columns, each a 15 ms bin, giving a rolling 3-second window. “Spikes / 15 ms” is the sum of the latest column; “active units / 150 ms” counts distinct units with at least one event in the last ten bins. Colors identify the same region groups as the 3D view. Background stochastic input produces low ongoing activity at rest.
 
@@ -36,3 +36,21 @@ The hook support height, bar radius, clearance and fixed limb segment lengths sh
 ## Verification
 
 Automated tests cover supported resting height, hook-lip clearance during translation, continuity of the rerack path, fixed limb lengths throughout the reachable workspace, failed-lift support and assisted recovery, exact spike/raster counters, activity changes with effort, background activity, and neural reset. Existing lifting-mechanics tests remain in the suite.
+
+## Expansion: design-time Virtual Fly Brain lookup
+
+On 20 September 2026, the public [VFB MCP service](https://vfb3-mcp.virtualflybrain.org) was queried using `search_terms` (exact adult-region labels), followed by `get_term_info`. The raw results are checked in as `data/vfb-search.json` and `data/vfb-term-info.json`; `data/vfb-regions.json` records the compact lookup and provenance. The same names and short-form IDs are embedded in `brain-view.js`. No VFB request runs in the site, its build, or its tests. The optional Python provenance scripts use the service's MCP transport during deliberate research refreshes only.
+
+| Verified VFB term | Short-form ID |
+| --- | --- |
+| adult central complex | FBbt_00003632 |
+| adult mushroom body | FBbt_00003684 |
+| adult lateral horn | FBbt_00007053 |
+| adult optic lobe | FBbt_00003701 |
+| adult antennal lobe | FBbt_00007401 |
+| adult subesophageal zone | FBbt_00110639 |
+| adult ventral nerve cord | FBbt_00004052 |
+
+Physical and endurance sessions raise synthetic central-complex/descending/VNC drive. Mushroom-body drive follows the activity's potential mastery gain across skills. Blackjack and poker also raise lateral-horn drive. The lateral horn is principally an olfactory processing region; using it to visualize card decisions is a game analogy, not evidence of a general poker decision center. Its added 24 model units replace 24 optic-lobe units, retaining exactly 384 total units and a separate VNC inset.
+
+**This is a stylized mapping: real region names, anatomy-informed broad functions and game-simplified signals. It is not a literal simulation of a fly playing poker or studying for a PhD. Real neurons do not have a poker circuit.** No connectivity was imported from VFB, no real neurons were assigned card-game roles, and the model does not claim biological accuracy at that specificity. Adaptation, scheduling, accelerated time and visible body development likewise illustrate game history rather than real insect physiology. Neural activity remains a visualization of game state, not a controller of behavior.

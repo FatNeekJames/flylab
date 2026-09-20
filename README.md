@@ -40,3 +40,33 @@ The lowered rack uses a continuous lift/back/settle motion and fixed-length grip
 ## Publish
 
 `npm run build` creates the self-contained static site in `dist/`. Pushes to `main` run the tests and deploy this folder through GitHub Actions to GitHub Pages. The production import map uses bundled Three.js files, so no CDN or server is needed. Reference media, dependencies and build output are excluded from Git.
+
+## Train, think and recover
+
+Manual mode remains the default. The original load, lifting, push, one-rep max and rack controls retain their original mechanics. A manual rep also contributes a small amount of bench mastery without changing strength or energy rules. Select a skill and run a single session to try the new activities, or choose **Autonomous** and let the fly choose sessions by need. The library shows every need score, current energy cost and mastery; the current session explains its choice. A nudge requests the next feasible session, without interrupting the current one.
+
+The twelve modules cover bench press, chest flies, Stairmaster, marathon training, swimming, blackjack, poker, PhD studies, yoga/stretching, chess, cooking and rest/sleep. These are animated practice sessions, not full card-game or academic simulators. Card activities involve no money or betting.
+
+Repeated practice reduces session energy cost toward a nonzero 25% floor. Yoga mastery reduces fatigue from other physical activities by up to 30%; cooking mastery accelerates rest recovery by up to 60%. PhD mastery grows much more slowly than chess or poker. Small changes to the existing thorax, abdomen and limb thickness reflect cumulative mastery across every practiced skill, including mental activities. These are game mechanics, not biological measurements.
+
+A timer independent of rendering advances sessions at **one real second per simulated minute**. Energy and fatigue change throughout sessions; mastery is awarded on completion. Autonomous scheduling chooses the highest eligible need at session boundaries, including rest as an ordinary module. Returning to Manual or stopping a session cancels unfinished practice without refunding spent energy or awarding mastery.
+
+Progress saves in this browser every five seconds and on page exit. Reopening resumes partial sessions and catches up at most **24 real hours** (60 simulated days); additional elapsed time is discarded. A closed browser does not execute code: catch-up computes missed sessions when reopened. Manual idle time never starts unsolicited activities. Web Locks allow one writing tab per origin; additional tabs show read-only progress and can be reloaded after the owning tab closes. Clearing site storage or Reset session clears development. Storage failure is shown in the UI.
+
+## Extension architecture and roadmap coverage
+
+`core.mjs` owns shared stats, session execution, persistence and scheduling, with no activity-specific IDs. `skills/shared.mjs` provides configurable implementations of `id`, `label`, `category`, `effortCost(state)`, `train(state, amount)` and `needScore(state, hours)`. Context includes that skill's own state, shared stats and support modifiers. Optional hooks supply session duration, effects, explanation and modifiers. To add a skill, export a `defineSkill` configuration from a new module and register it in `skills/index.mjs`; no core branch is needed. Presentation metadata selects reusable props/motions in `activity-view.js` and synthetic neural signal weights.
+
+| Roadmap step | Implementation and verification |
+| --- | --- |
+| 1. Generic core / bench extraction | `core.mjs`, `skills/bench-press.mjs`, stable `engine.mjs` facade; trajectories compared frame-for-frame against the original engine fixture |
+| 2. Shared adaptation | `adaptation.mjs`; monotonic, bounded positive-floor tests |
+| 3. New gym modules | Chest flies and Stairmaster; common contract and execution tests |
+| 4. Visible development | Aggregate mastery and gradual existing-mesh scaling; bounded mental/physical development tests |
+| 5–6. Endurance and cognition | Marathon, swimming, blackjack and poker; identical session executor, distinct costs and signals |
+| 7. VFB reference integration | Static names/IDs in `brain-view.js`, recorded query results under `data/`; see RESEARCH.md |
+| 8. Autonomy | `life-ui.js` timer, explicit modes, nudges, need explanations and saves; multi-day scheduling, cancellation, clock and reload tests |
+| 9. Supporting skills | Yoga, chess, cooking and ordinary rest module; cross-skill effect tests |
+| 10. Long-horizon study | PhD module; mastery-horizon comparison tests |
+
+Run `npm test` for the original mechanics/anatomy suite plus expansion regressions. `npm run build` bundles all skill modules and Three.js into the static output. Runtime code makes no external API calls. The Python scripts in `scripts/` are optional design-time VFB provenance tools, never required to build or run the game.
