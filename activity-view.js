@@ -68,7 +68,7 @@ export class ActivityView {
   const room=this.room(prop);for(const r of this.rooms.values())r.visible=r===room;
   const running=prop==='track',stairs=prop==='stairs',swim=prop==='pool',sleep=prop==='bed';
   const route=running?trackPath:stairs?stairPath:swim?poolPath:()=>({x:0,y:0,z:0,yaw:0}),path=route(t);
-  this.cameraDistance=running?21:swim?19:stairs?16:11;this.cameraHeight=stairs?1.5:1;
+  this.cameraDistance=running?21:swim?21:stairs?16:11;this.cameraHeight=stairs?1.5:1;
   const phase=t*(running?8:stairs?5:3),pulse=Math.sin(phase),height=swim?.56:sleep?1.03:1.80;
   const center=new THREE.Vector3(path.x,height+path.y+(running?.035*Math.abs(pulse):0),path.z);
   this.fly.rotation.set(sleep?0:swim?.07:Math.PI/2-(running?.15:prop==='books'?.15:0),path.yaw+(swim||sleep?0:Math.PI),0,'YXZ');if(prop==='mat')this.fly.rotation.z=.18*Math.sin(t*.8);
