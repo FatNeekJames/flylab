@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { FlyEngine } from './engine.mjs';
+const advance=(e,seconds)=>{for(let i=0;i<seconds*100;i++)e.step(.01)};
+test('weight clamps and matches symmetric 2.5 lb plate increments',()=>{const e=new FlyEngine();e.load(143);assert.equal(e.weight,145);e.load(0);assert.equal(e.weight,20);e.load(900);assert.equal(e.weight,500);e.load(NaN);assert.equal(e.weight,500)});
+test('a normal set counts completed reps and consumes energy',()=>{const e=new FlyEngine();e.start();advance(e,8);assert.ok(e.reps>=1);assert.equal(e.best,140);assert.ok(e.energy<100)});
+test('one-rep mode stops at exactly one successful lockout',()=>{const e=new FlyEngine();e.start(true);advance(e,20);assert.equal(e.reps,1);assert.equal(e.running,false);assert.equal(e.best,140)});
+test('overload stalls, fails, and does not award a rep',()=>{const e=new FlyEngine();e.load(315);e.start();advance(e,8);assert.equal(e.reps,0);assert.equal(e.running,false);assert.match(e.event,/No lift/)});
+test('pushing makes a heavy single possible',()=>{const e=new FlyEngine();e.load(215);e.pushing=true;e.start(true);advance(e,10);assert.equal(e.reps,1);assert.equal(e.best,215)});
+test('rest restores energy and clears effort',()=>{const e=new FlyEngine();e.start();advance(e,10);e.rest();advance(e,20);assert.equal(e.energy,100);assert.equal(e.effort,0);assert.equal(e.position,1)});
+test('adding excessive weight mid-rep causes failure',()=>{const e=new FlyEngine();e.start();advance(e,1.3);e.load(500);advance(e,5);assert.equal(e.reps,0);assert.equal(e.running,false)});
+test('reset returns a clean session',()=>{const e=new FlyEngine();e.start();advance(e,10);e.reset();assert.equal(e.reps,0);assert.equal(e.energy,100);assert.equal(e.weight,140);assert.equal(e.running,false)});

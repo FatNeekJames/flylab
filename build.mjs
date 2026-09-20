@@ -1,0 +1,10 @@
+import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
+const files=['app.js','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css'];
+await mkdir('dist/vendor/three',{recursive:true});
+for(const file of files)await copyFile(file,`dist/${file}`);
+const html=(await readFile('index.html','utf8')).replace('./node_modules/three/build/three.module.js','./vendor/three/three.module.js');
+await writeFile('dist/index.html',html);
+for(const name of ['three.module.js','three.core.js'])await copyFile(`node_modules/three/build/${name}`,`dist/vendor/three/${name}`);
+await copyFile('node_modules/three/LICENSE','dist/vendor/three/LICENSE');
+await writeFile('dist/.nojekyll','');
+console.log('Static site built in dist/ (app assets and Three.js only).');

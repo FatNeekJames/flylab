@@ -1,0 +1,8 @@
+node_modules/
+dist/
+reference.mp4
+reference-frames.jpg
+.env
+.env.*
+!.env.example
+*.log
