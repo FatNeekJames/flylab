@@ -70,3 +70,11 @@ Progress saves in this browser every five seconds and on page exit. Reopening re
 | 10. Long-horizon study | PhD module; mastery-horizon comparison tests |
 
 Run `npm test` for the original mechanics/anatomy suite plus expansion regressions. `npm run build` bundles all skill modules and Three.js into the static output. Runtime code makes no external API calls. The Python scripts in `scripts/` are optional design-time VFB provenance tools, never required to build or run the game.
+
+## Activity staging and movement
+
+Activities now have distinct environments and full-body poses. Bench press retains the original reclining rig; chest flies use an upright cable station with moving handles and connected cables. Stairmaster walks an eight-step ascent, crosses a landing, and descends the second flight. Marathon training follows a lane on a complete oval track, with planted stance feet and alternating swing phases. Swimming travels down the pool and makes continuous turns into the return lane, with alternating strokes, kicks and a wake.
+
+Cooking stands at a counter and stirs a pot while chopping. PhD study uses a monitor, keyboard and books inspired by the supplied desk reference. Card and chess activities use dedicated felt/board tables with reaching hands; yoga uses a standing balance pose on a mat; sleep uses a bed. The upright character is an anthropomorphic game pose, not a claim about natural fly locomotion. The four supporting legs are articulated for these activities, while the existing bench posture and limb constants are restored when returning to bench press.
+
+Scene framing adapts to the track, pool and stairs while retaining orbit/zoom controls. Non-bench scenes show session progress, mastery and practice counts, and hide barbell-only controls. `activity-motion.mjs` contains deterministic routes and a fixed-length limb solver; `activity-view.test.mjs` checks route continuity, direction, stair elevation, limb reach, planted feet and bench restoration. All geometry remains procedural; the supplied reference videos are not shipped.

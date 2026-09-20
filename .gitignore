@@ -11,3 +11,6 @@ __pycache__/
 scripts/create-skills.py
 scripts/wire-expansion.py
 scripts/repair-encoding.py
+
+reference-review/
+motion-probe.mjs
