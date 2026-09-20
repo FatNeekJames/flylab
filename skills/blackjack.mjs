@@ -6,14 +6,14 @@ export const skill = defineSkill({
   "baseCost": 8,
   "fatigueCost": 3,
   "gain": 2.1,
-  "duration": 720,
+  "duration": 3600,
   "interval": 5,
   "signals": {
     "decision": 1
   },
   "presentation": {
     "motion": "think",
-    "prop": "cards"
+    "prop": "blackjack"
   }
 });
 export default skill;

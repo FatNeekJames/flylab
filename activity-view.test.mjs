@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {trackPath,poolPath,stairPath,stairHeight,solveLimb,TAU} from './activity-motion.mjs';
+import {trackPath,poolPath,machineTread,machineFoot,STAIR_MACHINE,solveLimb,TAU} from './activity-motion.mjs';
 import {ActivityView} from './activity-view.js';
 import {skills} from './skills/index.mjs';
 class HeadlessView extends ActivityView {label(g){const o=new THREE.Object3D();g.add(o);return o;}}
@@ -16,11 +16,11 @@ test('running and swimming traverse closed routes with continuous forward-facing
   }
  }
 });
-test('stair walker gains elevation smoothly and returns by the other flight',()=>{
- let high=0,low=Infinity;const period=2*(6+Math.PI*.55)/.8/.72;
- for(let t=0;t<period;t+=.01){const p=stairPath(t);high=Math.max(high,p.y);low=Math.min(low,p.y);assert.ok(distance(p,stairPath(t+.001))<.004);}
- assert.ok(Math.abs(high-1.6)<1e-8);assert.equal(low,0);assert.ok(distance(stairPath(0),stairPath(period))<1e-8);
- assert.equal(stairHeight(3.1),0);assert.equal(stairHeight(-3),1.6);
+test('stair machine treads descend, recycle, and carry stance feet',()=>{
+ const a=machineTread(0,3),b=machineTread(.2,3);assert.ok(b.y<a.y);assert.ok(b.z>a.z);
+ const cycle=8/STAIR_MACHINE.rate;assert.ok(distance(a,machineTread(cycle,3))<1e-7);
+ for(let t=0;t<20;t+=.03)for(const side of [-1,1])for(let i=0;i<2;i++){const foot=machineFoot(t,side,i);if(foot.stance){const matches=Array.from({length:8},(_,n)=>machineTread(t,n)).filter(p=>p.visible&&Math.abs(p.y+.025-foot.y)<1e-7&&Math.abs(p.z-foot.z)<1e-7);assert.equal(matches.length,1);}}
+ const {view,fly}=setup(),skill=skills.find(s=>s.id==='stairmaster');view.update(skill,0);const start=fly.position.clone();view.update(skill,15);assert.ok(start.distanceTo(fly.position)<1e-7);assert.equal(view.room('stairs').userData.treads.length,8);
 });
 test('activity IK preserves both segment lengths even for unreachable targets',()=>{
  for(const target of [[0,0,0],[8,4,3],[.2,.8,-.6],[0,-1,0]]){const s=solveLimb([0,0,0],target,.95,.66);
@@ -35,7 +35,7 @@ test('all activity poses fit the rig and give walking feet actual ground contact
     const hand=pose.hand(side),root=[side*.23,1.12,-.05];assert.ok(Math.hypot(...hand.map((v,i)=>v-root[i]))<1.38,`${skill.id}: arm reach`);
     for(let i=0;i<2;i++){const target=pose.foot(side,i),hip=[side*.28,1.02,.25+i*.53],lengths=pose.legLengths??[.7,.67];
      assert.ok(Math.hypot(...target.map((v,j)=>v-hip[j]))<lengths[0]+lengths[1],`${skill.id}: foot reach at ${t}`);
-     if(['track','stairs'].includes(skill.presentation.prop)){const point=fly.localToWorld(new THREE.Vector3(...target)),surface=skill.id==='stairmaster'?stairHeight(point.z):.08;assert.ok(point.y>=surface-1e-6);assert.ok(point.y<=surface+.271);}
+     if(skill.presentation.prop==='track'){const point=fly.localToWorld(new THREE.Vector3(...target)),surface=.08;assert.ok(point.y>=surface-1e-6);assert.ok(point.y<=surface+.271);}
     }
    }
   }
@@ -51,4 +51,18 @@ test('walking feet remain planted during stance and alternate during swing',()=>
  const b=view.update(skill,.2),second=fly.localToWorld(new THREE.Vector3(...b.foot(-1,0)));
  assert.ok(first.distanceTo(second)<1e-7);
  const c=view.update(skill,.52),swing=fly.localToWorld(new THREE.Vector3(...c.foot(-1,0)));assert.ok(swing.y>.09);
+});
+
+test('blackjack dealer scene renders dealt cards and reveals only public card faces',async()=>{
+ const {BlackjackGame}=await import('./blackjack.mjs');
+ const original=globalThis.document;
+ globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>({fillRect(){},strokeRect(){},fillText(){}})})};
+ try{
+  const {view}=setup(),skill=skills.find(s=>s.id==='blackjack'),g=new BlackjackGame(1,[10,6,7,10,4].map((rank,i)=>({rank:String(rank),suit:'♠',id:String(i)})));
+  g.advance(2.61);view.update(skill,0,g.publicState());const data=view.room('blackjack').userData.blackjack;
+  assert.equal(data.cards.size,4);assert.equal(data.cards.get('3').material,data.materials.get('back'));
+  g.act('stand');view.update(skill,.1,g.publicState());assert.notEqual(data.cards.get('3').material,data.materials.get('back'));
+  for(const card of data.cards.values())assert.ok(card.position.toArray().every(Number.isFinite));
+  g.advance(2.2);view.update(skill,.2,g.publicState());assert.equal(data.cards.size,5);
+ }finally{globalThis.document=original;}
 });
