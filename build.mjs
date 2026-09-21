@@ -1,5 +1,5 @@
 import { mkdir, copyFile, readFile, writeFile, cp } from 'node:fs/promises';
-const files=['app.js','fly-appearance.mjs','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css','core.mjs','adaptation.mjs','life-ui.js','activity-view.js','activity-motion.mjs','blackjack.mjs','blackjack-ui.js','blackjack-view.js','vfb.mjs','vfb-ui.js','vfb-snapshot.mjs','research-ui.js'];
+const files=['app.js','workouts.mjs','fly-appearance.mjs','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css','core.mjs','adaptation.mjs','life-ui.js','activity-view.js','activity-motion.mjs','blackjack.mjs','blackjack-ui.js','blackjack-view.js','vfb.mjs','vfb-ui.js','vfb-snapshot.mjs','research-ui.js'];
 await mkdir('dist/vendor/three',{recursive:true});
 for(const file of files)await copyFile(file,`dist/${file}`);
 await cp('skills','dist/skills',{recursive:true});

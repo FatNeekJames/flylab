@@ -1,3 +1,4 @@
+import {workoutProgress} from './workouts.mjs';
 import * as THREE from 'three';
 import {buildBlackjackRoom,updateBlackjackRoom} from './blackjack-view.js';
 import {trackPath,poolPath,machineTread,machineFoot,STAIR_MACHINE,TAU} from './activity-motion.mjs';
@@ -42,7 +43,7 @@ export class ActivityView {
    g.userData.treads=[];for(let i=0;i<8;i++){const tread=new THREE.Group();g.add(tread);this.box(tread,0x758994,[0,-.06,0],[2.05,.12,.48]);this.box(tread,0xdac675,[0,.008,.20],[2.02,.018,.04]);for(let j=0;j<6;j++)this.box(tread,0x405563,[0,.009,-.18+j*.065],[1.9,.012,.012]);g.userData.treads.push(tread);}
    for(const x of [-1.04,1.04]){this.line(g,[[x,.3,1.6],[x,2.3,.7],[x,2.9,-1.15],[x,1.7,-1.35]],0xb0c2c6,.05);}
    box(0x254051,[0,2.95,-1.30],[1.45,.65,.18]);box(0x91c1b5,[0,2.97,-1.19],[1.23,.44,.035]);this.label(g,'STAIR MILL',[0,3.40,-1.3],1.5);
-   const display=this.label(g,'51 STEPS / MIN',[0,2.98,-1.16],1.05);g.userData.display=display;
+   const display=this.label(g,'STAIR MILL',[0,2.98,-1.16],1.05);g.userData.display=display;
   }else if(prop==='dumbbells'){
    box(0x354e59,[0,.015,0],[4.7,.04,3.4]);for(const s of [-1,1]){box(0x547797,[s*1.9,1.25,.15],[.3,2.5,.45]);box(0x263d4f,[s*1.9,.25,.15],[.6,.5,.7]);for(let j=0;j<5;j++)box(0x8fa5af,[s*1.9,.18+j*.12,-.13],[.42,.045,.26]);this.cylinder(g,0xc3d5d8,[s*1.9,1.95,-.15],.12,.1);}
    g.userData.cables=[-1,1].map(()=>{const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),l=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xced5ca}));g.add(l);return l;});this.label(g,'STANDING CABLE FLY',[0,2.6,.3],2.8);
@@ -67,10 +68,12 @@ export class ActivityView {
   }
   return g;
  }
- update(skill,clock,blackjack=null){
+ update(skill,clock,blackjack=null,session=null){
   const dt=Math.max(0,Math.min(.1,clock-(this.previousClock??clock)));this.previousClock=clock;
   const prop=skill?.presentation?.prop??'barbell';if(this.current!==prop){this.current=prop;this.started=clock;}
-  const t=clock-this.started,bench=prop==='barbell';this.root.visible=!bench;this.accessories.visible=prop==='dumbbells';this.benchObjects.forEach(o=>o.visible=bench);
+  let t=clock-this.started;const workout=session?.plan,progress=workout?workoutProgress(workout,session.elapsed):null;
+  if(workout?.kind==='endurance'){t=skill.id==='marathon'?progress.done*1000/40*TAU/.30:skill.id==='swimming'?progress.done*1000/25*(6+Math.PI*.55)/.8:progress.done/STAIR_MACHINE.rate;}
+  const bench=prop==='barbell';this.root.visible=!bench;this.accessories.visible=prop==='dumbbells';this.benchObjects.forEach(o=>o.visible=bench);
   this.fly.position.set(0,0,0);this.fly.rotation.set(0,0,0);this.cameraDistance=9.8;this.cameraHeight=1;
   if(bench){this.status='';return null;}
   const room=this.room(prop);for(const r of this.rooms.values())r.visible=r===room;
@@ -85,7 +88,7 @@ export class ActivityView {
   const handWorld=side=>{
    if(swim){const a=phase+(side>0?Math.PI:0);return world(side*(.5+.25*Math.sin(a)),.5+.20*Math.max(0,Math.cos(a)),-.6+.55*Math.cos(a));}
    if(sleep)return new THREE.Vector3(side*.45,1.08,-.4);
-   if(prop==='dumbbells'){const spread=(1+Math.cos(t*2))*.5;return world(side*(.12+spread*.95),1.60,-.8+spread*.5);}
+   if(prop==='dumbbells'){const spread=workout?.kind==='strength'?(progress.phase==='lifting'?progress.position:1):(1+Math.cos(t*2))*.5;return world(side*(.12+spread*.95),1.60,-.8+spread*.5);}
    if(prop==='kitchen')return side<0?world(-.55+.15*Math.cos(t*4),1.84,-1.05+.15*Math.sin(t*4)):world(.6,1.55+.10*Math.max(0,Math.sin(t*5)),-.90);
    if(prop==='books')return world(side*.28,1.40+.035*Math.max(0,Math.sin(t*9+side)),-.78);
    if(stairs)return world(side*1.04,2.56,-.33);
@@ -113,6 +116,7 @@ export class ActivityView {
   if(prop==='blackjack')updateBlackjackRoom(this,room,blackjack,dt);
   if(swim){const w=room.userData.wakes;w.position.set(path.x,.37,path.z);w.children.forEach((o,i)=>{o.scale.setScalar(.7+((t*.5+i*.2)%1));o.position.z=.2+i*.12;});}
   this.status=running?`Lap ${Math.floor(t*.30/TAU)+1} · oval circuit`:swim?`Length ${Math.floor(t*.8/(6+Math.PI*.55))+1} · lane turns`:stairs?`${Math.floor(t*STAIR_MACHINE.rate)} steps · revolving stair mill`:prop==='blackjack'?(blackjack?.phase==='thinking'?'Thinking: '+blackjack.decision?.action:'Dealer & fly · blackjack'):prop==='dumbbells'?'Standing cable fly':prop==='kitchen'?'Stir · chop · repeat':prop==='books'?'Read · type · revise':sleep?'Sleep & recover':prop==='mat'?'Standing stretch & balance':'Table practice';
+  if(progress)this.status=progress.label;
   return {hand:side=>local(handWorld(swim||sleep?side:-side)),foot:(side,index)=>feet(swim||sleep?side:-side,index),legLengths:swim||sleep?null:[.97,.97]};
  }
 }

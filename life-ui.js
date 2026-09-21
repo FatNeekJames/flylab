@@ -1,3 +1,4 @@
+import {workoutProgress,workoutSummary} from './workouts.mjs';
 import { SIM_RATE } from './core.mjs';
 
 const $ = id => document.getElementById(id);
@@ -75,7 +76,7 @@ export class LifeController {
     const skill = this.skill, session = this.core.current;
     if (!skill || !session) return null;
     const state = this.core.states[skill.id], effort = Math.min(1, skill.effortCost(this.core.context(skill.id)) / Math.max(1, skill.baseCost ?? 15));
-    return { label: skill.label, motor: (skill.signals.motor ?? 0) * effort,
+    return { label: skill.label, motor: (skill.signals.motor ?? 0) * effort * (session.plan?.kind==='strength'&&workoutProgress(session.plan,session.elapsed).phase!=='lifting'?.08:1),
       learning: Math.min(1, .2 + skill.gain * .22) * (1 - state.mastery / 100), decision: (skill.signals.decision ?? 0) * effort };
   }
   render() {
@@ -83,6 +84,7 @@ export class LifeController {
     for (const [id, enabled] of [['autoMode', auto], ['manualMode', !auto]]) { $(id).classList.toggle('selected', enabled); $(id).setAttribute('aria-pressed', enabled); $(id).disabled = !this.owner; }
     $('simSpeed').disabled=!this.owner;
     $('lifeCurrent').textContent = skill?.label ?? (auto ? 'Choosing next activity…' : 'Your fly. Your pace.');
+    $('workoutPlan').hidden=!s?.plan; if(s?.plan){$('workoutTitle').textContent=workoutSummary(s.plan);$('workoutLive').textContent=workoutProgress(s.plan,s.elapsed).label;$('workoutReason').textContent=s.plan.reason;}
     $('lifeReason').textContent = s?.reason ?? (auto ? 'Needs are evaluated at each session boundary.' : 'Bench controls work as before. Choose another skill for a single session, or switch on autonomy.');
     $('sessionProgress').value = s ? s.elapsed / s.duration : 0;
     $('sessionTime').textContent = s ? `${Math.ceil((s.duration - s.elapsed) / 60)} simulated min remaining` : 'No activity session running';
@@ -107,10 +109,10 @@ export class LifeController {
       card.querySelector('button').disabled = !this.owner;
       card.querySelector('p').textContent = `Need ${Math.round(item.need * 100)}% · ${item.cost.toFixed(1)} energy/session`;
       card.querySelector('progress').value = state.mastery;
-      card.querySelector('small').textContent = `${state.mastery.toFixed(1)}% mastery · ${state.sessions.toFixed(1)} sessions${item.eligible ? '' : ' · Recover first'}`;
+      card.querySelector('small').textContent = `${state.mastery.toFixed(1)}% mastery · ${state.sessions.toFixed(1)} sessions${item.plan?' · Next: '+workoutSummary(item.plan):''}${item.eligible ? '' : ' · Recover first'}`;
     }
     $('sessionHistory').replaceChildren(...c.history.slice(0, 6).map(item => {
-      const li = document.createElement('li'); li.textContent = `${c.skills.get(item.id).label} · +${item.gain.toFixed(2)} mastery · day ${Math.floor(item.at / 86400) + 1}`; return li;
+      const li = document.createElement('li'); li.textContent = `${c.skills.get(item.id).label}${item.plan?' · '+workoutSummary(item.plan):''} · +${item.gain.toFixed(2)} mastery · day ${Math.floor(item.at / 86400) + 1}`; return li;
     }));
     if (!c.history.length) { const li = document.createElement('li'); li.textContent = 'Your training history starts here.'; $('sessionHistory').appendChild(li); }
     const mods = c.modifiers(); $('supportEffects').textContent = `Yoga: ${Math.round((1 - (mods.fatigue.physical ?? 1)) * 100)}% less physical fatigue · Cooking: ${Math.round((mods.recovery - 1) * 100)}% faster recovery`;

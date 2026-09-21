@@ -4,7 +4,7 @@
   "description": "Interactive 3D fly bench-press simulator",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test engine.test.mjs anatomy.test.mjs core.test.mjs activity-view.test.mjs blackjack.test.mjs vfb.test.mjs research.test.mjs research-ui.test.mjs",
+    "test": "node --test engine.test.mjs anatomy.test.mjs core.test.mjs activity-view.test.mjs blackjack.test.mjs vfb.test.mjs research.test.mjs research-ui.test.mjs workouts.test.mjs",
     "build": "node build.mjs"
   },
   "keywords": [],
