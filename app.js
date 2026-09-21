@@ -1,3 +1,4 @@
+import {ResearchController} from './research-ui.js';
 import * as THREE from 'three';
 import {FlyEngine} from './engine.mjs';
 import {BENCH,BenchMotion,elbowFor} from './bench.mjs';
@@ -66,6 +67,7 @@ const push=v=>{v=v&&!life?.active&&life?.owner;engine.pushing=v;$('push').classL
 $('reset').onclick=()=>{engine.reset();life.reset();motion.reset();brainPanel.reset();try{localStorage.removeItem('flylab-best')}catch{}push(false);load(140);$('log').textContent='Fresh session. Small fly. Big possibilities.'};load(140);
 benchObjects.push(bar,rackAssist);
 const life=new LifeController(core,engine,motion),activityView=new ActivityView(scene,fly,benchObjects),blackjack=new BlackjackController(core);
+const research=new ResearchController(core,life);
 const brainPanel=new BrainPanel(engine),trace=$('trace').getContext('2d');const history=new Array(160).fill(0);let last=0,clock=0,sample=0,version=-1,prevRep=0;
 function drawTrace(t){trace.clearRect(0,0,600,110);trace.strokeStyle='#293640';trace.lineWidth=1;for(let y=10;y<110;y+=25){trace.beginPath();trace.moveTo(0,y);trace.lineTo(600,y);trace.stroke()}trace.strokeStyle='#b7e184';trace.lineWidth=1.6;trace.beginPath();history.forEach((v,i)=>{const y=95-v*.76;i?trace.lineTo(i*600/159,y):trace.moveTo(0,y)});trace.stroke()}
 function frame(now){const dt=Math.min((now-last)/1000||0,.05);last=now;clock+=dt;if(!life.active&&life.owner)motion.step(engine,dt);

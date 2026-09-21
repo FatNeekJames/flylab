@@ -6,7 +6,7 @@ export const skill = defineSkill({
   "baseCost": 12,
   "fatigueCost": 5,
   "gain": 0.08,
-  "duration": 3000,
+  "duration": 3600,
   "interval": 12,
   "signals": {
     "learning": 1

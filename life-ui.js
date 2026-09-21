@@ -22,6 +22,8 @@ export class LifeController {
       };
       $('skillGrid').appendChild(card); this.cards.set(id, card);
     }
+    $('simSpeed').value=String(core.speed);
+    $('simSpeed').onchange=()=>{if(!this.owner)return;this.catchUp();core.speed=Number($('simSpeed').value);this.save();};
     $('autoMode').onclick = () => this.setMode('auto');
     $('manualMode').onclick = () => this.setMode('manual');
     $('runSession').onclick = () => {
@@ -79,6 +81,7 @@ export class LifeController {
   render() {
     const c = this.core, skill = this.skill, s = c.current, auto = c.mode === 'auto';
     for (const [id, enabled] of [['autoMode', auto], ['manualMode', !auto]]) { $(id).classList.toggle('selected', enabled); $(id).setAttribute('aria-pressed', enabled); $(id).disabled = !this.owner; }
+    $('simSpeed').disabled=!this.owner;
     $('lifeCurrent').textContent = skill?.label ?? (auto ? 'Choosing next activity…' : 'Your fly. Your pace.');
     $('lifeReason').textContent = s?.reason ?? (auto ? 'Needs are evaluated at each session boundary.' : 'Bench controls work as before. Choose another skill for a single session, or switch on autonomy.');
     $('sessionProgress').value = s ? s.elapsed / s.duration : 0;

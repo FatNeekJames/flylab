@@ -2,7 +2,7 @@
 
 [Play FlyLab](https://fatneekjames.github.io/flylab/) · [GitHub repository](https://github.com/FatNeekJames/flylab)
 
-An interactive 3D recreation inspired by the supplied fly bench-press video. Built with Three.js and vanilla JavaScript. All assets are procedural and run locally; no API keys are needed.
+An interactive 3D recreation inspired by the supplied fly bench-press video. Built with Three.js and vanilla JavaScript. The simulation assets are procedural. Live AI research uses a private local service and an OpenAI API key; the base game, VFB anatomy and Minecraft bot do not require that key.
 
 ## Run
 
@@ -45,13 +45,13 @@ The lowered rack uses a continuous lift/back/settle motion and fixed-length grip
 
 Manual mode remains the default. The original load, lifting, push, one-rep max and rack controls retain their original mechanics. A manual rep also contributes a small amount of bench mastery without changing strength or energy rules. Select a skill and run a single session to try the new activities, or choose **Autonomous** and let the fly choose sessions by need. The library shows every need score, current energy cost and mastery; the current session explains its choice. A nudge requests the next feasible session, without interrupting the current one.
 
-The twelve modules cover bench press, chest flies, Stairmaster, marathon training, swimming, blackjack, poker, PhD studies, yoga/stretching, chess, cooking and rest/sleep. Blackjack runs complete automatic card-game rounds; the other activities remain animated practice sessions. There is no real money or betting.
+The twelve modules cover bench press, chest flies, Stairmaster, marathon training, swimming, blackjack, poker, PhD studies, yoga/stretching, chess, cooking and rest/sleep. Blackjack runs complete automatic card-game rounds; PhD studies now produce research notes through the local service; poker and chess still remain animated practice sessions. There is no real money or betting.
 
 Repeated practice reduces session energy cost toward a nonzero 25% floor. Yoga mastery reduces fatigue from other physical activities by up to 30%; cooking mastery accelerates rest recovery by up to 60%. PhD mastery grows much more slowly than chess or poker. Small changes to the existing thorax, abdomen and limb thickness reflect cumulative mastery across every practiced skill, including mental activities. These are game mechanics, not biological measurements.
 
-A timer independent of rendering advances sessions at **one real second per simulated minute**. Energy and fatigue change throughout sessions; mastery is awarded on completion. Autonomous scheduling chooses the highest eligible need at session boundaries, including rest as an ordinary module. Returning to Manual or stopping a session cancels unfinished practice without refunding spent energy or awarding mastery.
+A timer independent of rendering advances sessions at **real time by default**, with 10× and 60× fast-forward controls. Energy and fatigue change throughout sessions; mastery is awarded on completion. Autonomous scheduling chooses the highest eligible need at session boundaries, including rest as an ordinary module. Returning to Manual or stopping a session cancels unfinished practice without refunding spent energy or awarding mastery.
 
-Progress saves in this browser every five seconds and on page exit. Reopening resumes partial sessions and catches up at most **24 real hours** (60 simulated days); additional elapsed time is discarded. A closed browser does not execute code: catch-up computes missed sessions when reopened. Manual idle time never starts unsolicited activities. Web Locks allow one writing tab per origin; additional tabs show read-only progress and can be reloaded after the owning tab closes. Clearing site storage or Reset session clears development. Storage failure is shown in the UI.
+Progress saves in this browser every five seconds and on page exit. Reopening resumes partial sessions and catches up at most **24 real hours** (at the selected clock speed); additional elapsed time is discarded. A closed browser does not execute code: catch-up computes missed sessions when reopened. Manual idle time never starts unsolicited activities. Web Locks allow one writing tab per origin; additional tabs show read-only progress and can be reloaded after the owning tab closes. Clearing site storage or Reset session clears development. Storage failure is shown in the UI.
 
 ## Extension architecture and roadmap coverage
 
@@ -69,7 +69,7 @@ Progress saves in this browser every five seconds and on page exit. Reopening re
 | 9. Supporting skills | Yoga, chess, cooking and ordinary rest module; cross-skill effect tests |
 | 10. Long-horizon study | PhD module; mastery-horizon comparison tests |
 
-Run `npm test` for the original mechanics/anatomy suite plus expansion regressions. `npm run build` bundles all skill modules and Three.js into the static output. Runtime code makes no external API calls. The Python scripts in `scripts/` are optional design-time VFB provenance tools, never required to build or run the game.
+Run `npm test` for the original mechanics/anatomy suite plus expansion regressions. `npm run build` bundles all skill modules and Three.js into the static output. VFB research calls its public API; AI study calls the local service, which uses the OpenAI Responses API. The Python scripts in `scripts/` are optional design-time VFB provenance tools, never required to build or run the game.
 
 ## Activity staging and movement
 
@@ -87,4 +87,19 @@ Blackjack now has a six-deck shuffled shoe, a visible dealer who deals cards, a 
 
 Rules were checked against [Bicycle's blackjack rules](https://bicyclecards.com/how-to-play/blackjack). The fly's rule-based choices follow the [multi-deck, stand-on-soft-17 strategy](https://wizardofodds.com/games/blackjack/strategy/8-decks/), with double-after-split and legal-action fallbacks. This is a static strategy, not a neural model learning blackjack. The decision function receives only the current player hand, the dealer upcard and hand count; it cannot inspect the hole card or remaining shoe. The brain panel's decision signal rises during the thinking phase as a game visualization.
 
-A blackjack skill session lasts one simulated hour (60 real seconds), automatically playing successive rounds. A per-device seed and session start reconstruct the same current game after reload; the live lifecycle timer still owns session timing. Leaving the activity stops its table. `blackjack.mjs` contains pure rules and strategy, `blackjack-ui.js` presents public game state, and `blackjack-view.js` renders the dealer and cards. No external requests are made at runtime.
+A blackjack skill session lasts one simulated hour (one real hour at the default clock speed), automatically playing successive rounds. A per-device seed and session start reconstruct the same current game after reload; the live lifecycle timer still owns session timing. Leaving the activity stops its table. `blackjack.mjs` contains pure rules and strategy, `blackjack-ui.js` presents public game state, and `blackjack-view.js` renders the dealer and cards. Blackjack itself makes no external requests.
+
+
+## Research journal and Minecraft lab
+
+Run `npm start` and open [the local app](http://localhost:5173/#researchPanel). The dedicated `OPENAI_API_KEY` belongs in the ignored `.env.local` file; never put it in the browser or commit it. Node 24 is recommended. The server binds only to loopback, denies cross-origin API access and serves only an explicit public-asset list. GitHub Pages serves the base simulation and anatomy fallback, with a link to the local app for research and Minecraft. Local and published browser progress are separate.
+
+Choose any educational topic (or leave blank for a rotating curriculum) and start a research hour. PhD sessions trigger four checkpoints at 0, 15, 30 and 45 study minutes. Each uses web search and then a structured note-generation call, with original source links, uncertainty and follow-up questions. Default model: `gpt-5-mini`; override with `FLYLAB_MODEL`. The service allows 12 checkpoint attempts per UTC day and only one in-flight checkpoint. Fast-forward never bypasses that budget. OpenAI billing failures pause research with an actionable error; no notes or recall improvements are fabricated. Resume explicitly after fixing the failure.
+
+Research and learned weights persist privately in `.flylab/research.json`. The journal lists sessions, notes, source links, before/after recall questions and mistakes, and exports JSON. “Ask the fly’s learned notes” uses the local learner without a further API call. An online softmax classifier trains on hashed word features from stored notes and training questions, with replay of older notes (up to 200). Held-out paraphrased questions are never used for training. This measures note retrieval, not understanding, factual correctness or a general intelligence score; the OpenAI model is not fine-tuned. Research does not yet train the poker/chess policies. The fly's original mastery numbers remain separate game statistics.
+
+An open owning browser tab advances study time. Closing it pauses new checkpoints once due work is finished; reopening can catch up the current/saved session within the daily budget. A stopped or failed checkpoint does not earn learned notes. Resetting the game does not erase the research journal.
+
+For Minecraft, open a **Java practice world to LAN**, enter its port in the Minecraft lab and connect. The bot joins as `FlyLab` using the Minecraft protocol; it does not control the launcher or your desktop. A first curriculum gathers one log, crafts planks and crafts a table. Attempts are bounded to 40 seconds, observe inventory changes before recording success, and save target outcomes to `.flylab/minecraft.json`. An upper-confidence-bound target selector balances untried wood types against past success rates. Automatic practice stops after a crafting table is obtained; pathfinding cannot dig incidental blocks or build towers. The selected log is intentionally mined. This is a small, testable starter curriculum, not an implementation of a general Minecraft agent. Authenticated servers require separate bot-account setup; the connector does not bypass authentication.
+
+VFB reads now use a same-origin proxy locally and a verified, retrieval-dated fallback for all seven displayed regions if a live request fails. The fallback is clearly marked; arbitrary VFB searches still require network access.

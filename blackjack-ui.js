@@ -10,7 +10,7 @@ export class BlackjackController {
   if(!active){this.key=null;this.game=null;return null;}
   const key=`${session.start}:${this.core.completed}`;
   if(this.key!==key){this.key=key;this.game=new BlackjackGame(this.seed^(Math.round(session.start*1000)>>>0)^this.core.completed);this.lastVersion=-1;}
-  this.game.advance(Math.max(0,session.elapsed/60-this.game.time));const state=this.game.publicState();
+  this.game.advance(Math.max(0,session.elapsed-this.game.time));const state=this.game.publicState();
   $('bjPhase').textContent=state.phase==='thinking'?`Thinking · ${Math.ceil(state.wait)}s`:state.phase==='result'?'Round complete':state.phase==='dealer'?'Dealer plays':state.phase==='split-deal'?'Dealing split hands':'Dealing';
   if(this.lastVersion!==this.game.version){this.lastVersion=this.game.version;this.render(state);}
   return state;

@@ -1,6 +1,6 @@
 import { clamp, development } from './adaptation.mjs';
 
-export const SIM_RATE = 60; // one real second = one simulated minute
+export const SIM_RATE = 1; // real time by default
 export const MAX_CATCHUP = 24 * 60 * 60; // real seconds: bounded to one day
 export const SAVE_VERSION = 1;
 const emptyState = () => ({ mastery: 0, sessions: 0, lastSession: null });
@@ -24,7 +24,7 @@ export class ActivityCore {
     this.states = Object.fromEntries([...this.skills.keys()].map(id => [id, emptyState()]));
     this.time = 0; this.mode = 'manual'; this.selected = this.skills.keys().next().value;
     this.current = null; this.nudge = null; this.history = []; this.completed = 0;
-    this.lastWall = null; this.lastGain = 0; this.catchup = null;
+    this.speed = 1; this.lastWall = null; this.lastGain = 0; this.catchup = null;
   }
   modifiers() {
     const result = { fatigue: {}, recovery: 1 };
@@ -62,7 +62,7 @@ export class ActivityCore {
     const duration = skill.sessionDuration?.(context) ?? skill.duration ?? 1200;
     if (!Number.isFinite(duration) || duration <= 0) throw new RangeError('Invalid session duration');
     this.selected = id;
-    this.current = { id, elapsed: 0, duration, effects: entry.effects, reason: entry.reason, start: this.time };
+    this.current = { uid: crypto.randomUUID(), id, elapsed: 0, duration, effects: entry.effects, reason: entry.reason, start: this.time };
     if (id === this.nudge) this.nudge = null;
     return true;
   }
@@ -74,7 +74,7 @@ export class ActivityCore {
     this.lastGain = next.mastery - old.mastery; this.states[id] = next;
   }
   advance(seconds) {
-    let remaining = clamp(seconds, 0, MAX_CATCHUP * SIM_RATE);
+    let remaining = clamp(seconds, 0, MAX_CATCHUP * 60);
     while (remaining > 1e-7) {
       if (!this.current) {
         if (this.mode !== 'auto' || !this.start(this.choose())) { this.time += remaining; break; }
@@ -85,7 +85,7 @@ export class ActivityCore {
       session.elapsed += chunk; this.time += chunk; remaining -= chunk;
       if (session.elapsed >= session.duration - 1e-7) {
         this.recordTraining(session.id); this.completed++;
-        this.history.unshift({ id: session.id, at: this.time, gain: this.lastGain, reason: session.reason });
+        this.history.unshift({ uid: session.uid, id: session.id, at: this.time, gain: this.lastGain, reason: session.reason });
         this.history.length = Math.min(24, this.history.length); this.current = null;
       }
     }
@@ -98,13 +98,13 @@ export class ActivityCore {
     const elapsed = (now - this.lastWall) / 1000; this.lastWall = now;
     if (this.mode !== 'auto' && !this.current) return;
     const seconds = Math.min(MAX_CATCHUP, elapsed), before = this.completed;
-    this.advance(seconds * SIM_RATE);
+    this.advance(seconds * this.speed);
     if (elapsed > 15) this.catchup = { seconds, sessions: this.completed - before, capped: elapsed > MAX_CATCHUP };
   }
   get development() { return development(this.states); }
   serialize() {
     return JSON.stringify({ version: SAVE_VERSION, stats: this.stats, states: this.states, time: this.time, mode: this.mode,
-      selected: this.selected, current: this.current, history: this.history, completed: this.completed, lastWall: this.lastWall, nudge: this.nudge });
+      speed: this.speed, selected: this.selected, current: this.current, history: this.history, completed: this.completed, lastWall: this.lastWall, nudge: this.nudge });
   }
   restore(raw) {
     try {
@@ -115,6 +115,7 @@ export class ActivityCore {
         const s = value.states[id]; if (!s) continue;
         this.states[id] = { mastery: clamp(s.mastery), sessions: clamp(s.sessions, 0, 1e9), lastSession: Number.isFinite(s.lastSession) ? clamp(s.lastSession, 0, this.time) : null };
       }
+      this.speed = [1,10,60].includes(value.speed) ? value.speed : 1;
       this.mode = value.mode === 'auto' ? 'auto' : 'manual';
       if (this.skills.has(value.selected)) this.selected = value.selected;
       this.completed = clamp(value.completed, 0, 1e9); this.lastWall = Number.isFinite(value.lastWall) ? value.lastWall : null;
@@ -122,7 +123,7 @@ export class ActivityCore {
       this.history = Array.isArray(value.history) ? value.history.filter(h => this.skills.has(h.id) && Number.isFinite(h.at) && Number.isFinite(h.gain)).slice(0, 24) : [];
       const c = value.current;
       if (c && this.skills.has(c.id) && Number.isFinite(c.duration) && c.duration > 0 && c.duration <= 86400 && Number.isFinite(c.elapsed) && c.elapsed >= 0 && c.elapsed < c.duration && Number.isFinite(c.effects?.energy) && Number.isFinite(c.effects?.fatigue)) {
-        this.current = { id: c.id, duration: c.duration, elapsed: c.elapsed, effects: { energy: clamp(c.effects.energy, -100, 100), fatigue: clamp(c.effects.fatigue, -100, 100) }, reason: typeof c.reason === 'string' ? c.reason.slice(0, 200) : 'Resumed session', start: this.time - c.elapsed };
+        this.current = { uid: typeof c.uid==='string'?c.uid:crypto.randomUUID(), id: c.id, elapsed: c.elapsed, duration: c.duration, effects: { energy: clamp(c.effects.energy, -100, 100), fatigue: clamp(c.effects.fatigue, -100, 100) }, reason: typeof c.reason === 'string' ? c.reason.slice(0, 200) : 'Resumed session', start: this.time - c.elapsed };
       }
       return true;
     } catch { return false; }
