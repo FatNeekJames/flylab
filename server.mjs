@@ -11,7 +11,7 @@ const vfb=new VFBClient();
 const root=resolve('.');
 const types={html:'text/html',js:'text/javascript',mjs:'text/javascript',css:'text/css',json:'application/json'};
 // Explicit public assets only: never serve credentials, git metadata or server code.
-const files=new Set(['index.html','app.js','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css','core.mjs','adaptation.mjs','life-ui.js','activity-view.js','activity-motion.mjs','blackjack.mjs','blackjack-ui.js','blackjack-view.js','vfb.mjs','vfb-ui.js','vfb-snapshot.mjs','research-ui.js']);
+const files=new Set(['index.html','app.js','fly-appearance.mjs','bench.mjs','brain-view.js','engine.mjs','neural.mjs','style.css','core.mjs','adaptation.mjs','life-ui.js','activity-view.js','activity-motion.mjs','blackjack.mjs','blackjack-ui.js','blackjack-view.js','vfb.mjs','vfb-ui.js','vfb-snapshot.mjs','research-ui.js']);
 export function publicAsset(pathname){
  let path;try{path=decodeURIComponent(pathname).replace(/^\//,'')}catch{return null}
  if(!path)path='index.html';

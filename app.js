@@ -1,3 +1,4 @@
+import {createFlyAppearance,detailFlyLeg} from './fly-appearance.mjs';
 import {ResearchController} from './research-ui.js';
 import * as THREE from 'three';
 import {FlyEngine} from './engine.mjs';
@@ -27,24 +28,19 @@ for(const z of [-.8,1.7]){box(0,.22,z,.18,.6,.2,blue);box(0,.04,z,1.75,.15,.35,b
 for(const x of [-1.52,1.52]){box(x,1.04,-.95,.15,2.08,.17,blue);box(x,.04,-.6,.65,.17,2.6,blue);box(x,BENCH.hookTop-.06,-.76,.17,.12,.48,steel);box(x,BENCH.lipTop-.065,-.53,.15,.13,.12,blue);box(x,BENCH.safetyTop-.06,.15,.12,.12,2.15,blue)}box(0,.25,-1.6,3.1,.12,.14,blue);
 const benchObjects=scene.children.slice(benchStart);
 const fly=new THREE.Group();scene.add(fly);
-const abdomen=orb(0,1.03,.98,.44,.29,.8,gold,fly);for(let i=0;i<5;i++){const z=.53+i*.22;const ring=mesh(new THREE.TorusGeometry(.32-i*.018,.014,6,36),darkgold,0,1.045,z,fly);ring.scale.x=1.23;ring.scale.y=.78}
-const thorax=orb(0,1.08,.13,.33,.28,.38,gold,fly);orb(0,1.17,-.37,.3,.27,.3,gold,fly);orb(-.23,1.25,-.47,.13,.17,.17,eye,fly);orb(.23,1.25,-.47,.13,.17,.17,eye,fly);
-for(const side of [-1,1]){rod([side*.13,1.37,-.45],[side*.22,1.56,-.67],.018,darkgold,fly);orb(side*.22,1.56,-.67,.036,.036,.045,darkgold,fly)}
-const wingM=new THREE.MeshPhysicalMaterial({color:0xc0e5e6,transparent:true,opacity:.28,roughness:.2,metalness:.1,side:THREE.DoubleSide,depthWrite:false});
-for(const side of [-1,1]){const wing=orb(side*.35,.99,.57,.31,.035,.87,wingM,fly);wing.rotation.y=side*.26;for(let i=0;i<3;i++)rod([side*.2,1.015,.04],[side*(.43+i*.07),1.02,1.19],.006,steel,fly)}
+const {abdomen,thorax,legMaterial,hairMaterial}=createFlyAppearance(fly);
 const legs=new THREE.Group();fly.add(legs);
 const armRig=[],footRig=[];
 for(const s of [-1,1]){
- const upper=rod([s*.23,1.12,-.05],[s*.62,1.5,-.12],.028,gold,legs);
- const lower=rod([s*.62,1.5,-.12],[s*.79,2,-.38],.024,gold,legs);
- const hand=orb(s*.79,2,-.38,.047,.045,.06,darkgold,legs);
+ const upper=rod([s*.23,1.12,-.05],[s*.62,1.5,-.12],.028,legMaterial,legs);
+ const lower=rod([s*.62,1.5,-.12],[s*.79,2,-.38],.024,legMaterial,legs);
+ const hand=orb(s*.79,2,-.38,.047,.045,.06,legMaterial,legs);
  armRig.push({s,upper,lower,hand,upperLength:upper.geometry.parameters.height,lowerLength:lower.geometry.parameters.height});
- for(let i=0;i<2;i++){const zz=.25+i*.53,root=[s*.28,1.02,zz],joint=[s*(.66+i*.12),.83,zz+.27],end=[s*(.84+i*.18),.37,zz+.52];const upper=rod(root,joint,.022,gold,legs),lower=rod(joint,end,.016,gold,legs);footRig.push({s,i,root,joint,end,upper,lower,upperLength:upper.geometry.parameters.height,lowerLength:lower.geometry.parameters.height})}
+ for(let i=0;i<2;i++){const zz=.25+i*.53,root=[s*.28,1.02,zz],joint=[s*(.66+i*.12),.83,zz+.27],end=[s*(.84+i*.18),.37,zz+.52];const upper=rod(root,joint,.022,legMaterial,legs),lower=rod(joint,end,.016,legMaterial,legs);footRig.push({s,i,root,joint,end,upper,lower,upperLength:upper.geometry.parameters.height,lowerLength:lower.geometry.parameters.height})}
 }
 const axis=new THREE.Vector3(0,1,0),ra=new THREE.Vector3(),rb=new THREE.Vector3(),rd=new THREE.Vector3();
 function moveRod(o,a,b,originalLength){ra.set(...a);rb.set(...b);rd.subVectors(rb,ra);o.position.copy(ra).add(rb).multiplyScalar(.5);o.scale.y=rd.length()/originalLength;o.quaternion.setFromUnitVectors(axis,rd.normalize())}
-// Fine bristles make the subject read as an insect from every angle.
-for(let i=0;i<72;i++){const a=i*2.39996,z=.45+(i%12)*.09,x=Math.cos(a)*.4,y=1.03+Math.sin(a)*.27;rod([x,y,z],[x*1.12,y+(y-1.03)*.18,z+.055],.004,darkgold,fly)}
+for(const rig of [...armRig,...footRig])for(const segment of [rig.upper,rig.lower])detailFlyLeg(segment,hairMaterial);
 
 const rackAssist=new THREE.Group();scene.add(rackAssist);for(const x of [-1.3,1.3])box(x,0,0,.24,.08,.3,mat(0x6bddc1,.5),rackAssist);rackAssist.visible=false;
 const bar=new THREE.Group();scene.add(bar);rod([-2.55,0,0],[2.55,0,0],.045,steel,bar);for(const s of [-1,1])rod([s*1.66,0,0],[s*2.45,0,0],.067,black,bar);
