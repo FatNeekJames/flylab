@@ -39,7 +39,7 @@ Automated tests cover supported resting height, hook-lip clearance during transl
 
 ## Expansion: design-time Virtual Fly Brain lookup
 
-On 20 September 2026, the public [VFB MCP service](https://vfb3-mcp.virtualflybrain.org) was queried using `search_terms` (exact adult-region labels), followed by `get_term_info`. The raw results are checked in as `data/vfb-search.json` and `data/vfb-term-info.json`; `data/vfb-regions.json` records the compact lookup and provenance. The same names and short-form IDs are embedded in `brain-view.js`. No VFB request runs in the site, its build, or its tests. The optional Python provenance scripts use the service's MCP transport during deliberate research refreshes only.
+On 20 September 2026, the public [VFB MCP service](https://vfb3-mcp.virtualflybrain.org) was queried using `search_terms` (exact adult-region labels), followed by `get_term_info`. The raw results are checked in as `data/vfb-search.json` and `data/vfb-term-info.json`; `data/vfb-regions.json` records the compact lookup and provenance. The same names and short-form IDs are embedded in `brain-view.js`. That initial snapshot remains offline. The live research integration below now also supports deliberate browser requests; builds and unit tests make no VFB calls. The optional Python provenance scripts use the service's MCP transport during deliberate research refreshes only.
 
 | Verified VFB term | Short-form ID |
 | --- | --- |
@@ -54,3 +54,12 @@ On 20 September 2026, the public [VFB MCP service](https://vfb3-mcp.virtualflybr
 Physical and endurance sessions raise synthetic central-complex/descending/VNC drive. Mushroom-body drive follows the activity's potential mastery gain across skills. Blackjack and poker also raise lateral-horn drive. The lateral horn is principally an olfactory processing region; using it to visualize card decisions is a game analogy, not evidence of a general poker decision center. Its added 24 model units replace 24 optic-lobe units, retaining exactly 384 total units and a separate VNC inset.
 
 **This is a stylized mapping: real region names, anatomy-informed broad functions and game-simplified signals. It is not a literal simulation of a fly playing poker or studying for a PhD. Real neurons do not have a poker circuit.** No connectivity was imported from VFB, no real neurons were assigned card-game roles, and the model does not claim biological accuracy at that specificity. Adaptation, scheduling, accelerated time and visible body development likewise illustrate game history rather than real insect physiology. Neural activity remains a visualization of game state, not a controller of behavior.
+
+
+## Live research integration — 21 September 2026
+
+Following the [VFB API documentation](https://www.virtualflybrain.org/docs/apis/) and [VFBquery reference](https://www.virtualflybrain.org/docs/apis/vfbquery/), the brain panel now searches `/search?query=...&limit=8` and reads `/get_term_info?id=...` from `https://v3-cached.virtualflybrain.org`. Live requests verified the adult mushroom body record and its publication metadata. The service returns `Access-Control-Allow-Origin: *`, so this public, keyless integration also works on GitHub Pages.
+
+The client keeps a bounded 24-hour memory cache, merges identical in-flight requests, times out after 15 seconds, validates record identity and renders external content as text. Publication links are constructed from validated FlyBase publication IDs. A maximum of 40 records can be saved on the device with retrieval timestamps and source URLs; failures leave saved notes usable. Queries are sent to VFB only on request. The API integration does not import connectivity or meshes, train weights, or turn the illustrative spikes into experimental measurements.
+
+The development server now serves only explicit public app assets, preventing `.env.local`, Git metadata and server source from being downloaded. OpenAI credentials remain separate from this public VFB integration.
