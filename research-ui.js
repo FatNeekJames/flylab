@@ -6,6 +6,7 @@ async function api(path,data){const r=await fetch('./api/'+path,{method:data===u
 export class ResearchController{
  constructor(core,life){this.core=core;this.life=life;this.busy=false;this.state=null;this.selected=null;this.observed=null;this.activeId=null;this.signature='';this.autoPractice=false;
   for(const button of document.querySelectorAll('[data-research-tab]'))button.onclick=()=>{for(const b of document.querySelectorAll('[data-research-tab]')){b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',b===button)}for(const pane of document.querySelectorAll('[data-research-pane]'))pane.hidden=pane.dataset.researchPane!==button.dataset.researchTab};
+  $('researchDiscover').onclick=()=>{$('researchTopic').value='';this.message('The next research hour will discover a fresh subject across the web.');};
   $('researchStart').onclick=()=>this.start();$('researchStop').onclick=()=>this.stop().catch(e=>this.message(e.message));$('researchRetry').onclick=async()=>{try{const active=this.state?.sessions.find(s=>['error','paused'].includes(s.status));if(active)await api('research/resume',{id:active.id});await this.tick()}catch(e){this.message(e.message)}};
   $('researchRecall').onsubmit=async event=>{event.preventDefault();try{const answer=await api('research/recall',{question:$('researchQuestion').value});const host=$('researchAnswer');host.replaceChildren(el('p',answer.answer));for(const source of answer.sources||[])host.append(sourceLink(source),el('br'));}catch(e){$('researchAnswer').textContent=e.message}};
   $('researchExport').onclick=()=>{if(!this.state)return;const blob=new Blob([JSON.stringify(this.state.sessions,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=el('a');a.href=url;a.download='flylab-research-journal.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
@@ -39,7 +40,7 @@ export class ResearchController{
   const list=$('researchSessions');list.replaceChildren();for(const s of state.sessions){const b=el('button',`${s.topic} · ${s.lessons.length}/4 checkpoints · ${s.status}`);b.onclick=()=>{this.selected=s.id;this.renderEntry()};list.append(b)}if(!state.sessions.length)list.append(el('p','No research yet. Choose a topic or let the fly choose its next subject.'));this.renderEntry();
  }
  renderEntry(){const session=this.state.sessions.find(s=>s.id===this.selected)||this.state.sessions[0],host=$('researchEntry');host.replaceChildren();if(!session)return;
-  host.append(el('h3',session.topic),el('p',`${new Date(session.startedAt).toLocaleString()} · ${Math.floor(session.elapsed/60)} study minutes · ${session.status}`));
+  host.append(el('small',session.autoTopic?'Discovered across the web':'User-selected subject'),el('h3',session.topic),el('p',`${new Date(session.startedAt).toLocaleString()} · ${Math.floor(session.elapsed/60)} study minutes · ${session.status}`));
   if(session.error)host.append(el('p',session.error));
   for(const [i,lesson] of session.lessons.entries()){
    const article=el('article');article.className='research-lesson';article.append(el('small',`CHECKPOINT ${i+1} · ${lesson.simMinute} MIN · ${lesson.model}`),el('h4',lesson.title),el('p',lesson.summary));
